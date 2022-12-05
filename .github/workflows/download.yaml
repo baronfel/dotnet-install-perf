@@ -1,0 +1,13 @@
+name: test ps1 download speed
+
+on: push
+
+jobs:
+  download:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repo        
+        uses: actions/checkout@v2
+      - name: download .net
+        run: .\dotnet-install.ps1 -Channel LTS
