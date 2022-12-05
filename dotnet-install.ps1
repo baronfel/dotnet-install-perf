@@ -167,7 +167,7 @@ function Say-Verbose($str) {
 
 function TimeAndLog($name, $block) {
     $time = Measure-Command $block
-    Say-Verbose "'$name' took $time.Milliseconds"
+    Say "'$name' took $time.Milliseconds"
 }
 
 function Say-Invocation($Invocation) {
@@ -1121,14 +1121,16 @@ if ($SharedRuntime -and (-not $Runtime)) {
 
 $OverrideNonVersionedFiles = !$SkipNonVersionedFiles
 
-$CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
-$NormalizedQuality = Get-NormalizedQuality $Quality
-Say-Verbose "Normalized quality: '$NormalizedQuality'"
-$NormalizedChannel = Get-NormalizedChannel $Channel
-Say-Verbose "Normalized channel: '$NormalizedChannel'"
-$NormalizedProduct = Get-NormalizedProduct $Runtime
-Say-Verbose "Normalized product: '$NormalizedProduct'"
-$FeedCredential = ValidateFeedCredential $FeedCredential
+TimeAndLog "discover product" {
+    $script:CLIArchitecture = Get-CLIArchitecture-From-Architecture $Architecture
+    $script:NormalizedQuality = Get-NormalizedQuality $Quality
+    Say-Verbose "Normalized quality: '$NormalizedQuality'"
+    $script:NormalizedChannel = Get-NormalizedChannel $Channel
+    Say-Verbose "Normalized channel: '$NormalizedChannel'"
+    $script:NormalizedProduct = Get-NormalizedProduct $Runtime
+    Say-Verbose "Normalized product: '$NormalizedProduct'"
+    $script:FeedCredential = ValidateFeedCredential $FeedCredential
+}
 
 $InstallRoot = Resolve-Installation-Path $InstallDir
 Say-Verbose "InstallRoot: $InstallRoot"
@@ -1206,7 +1208,7 @@ if ($DryRun) {
     return
 }
 
-TimeAndLog "prepare" Prepare-Install-Directory
+TimeAndLog "prepare" { Prepare-Install-Directory }
 
 $ZipPath = [System.IO.Path]::combine([System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName())
 Say-Verbose "Zip path: $ZipPath"
@@ -1217,11 +1219,11 @@ $ErrorMessages = @()
 
 foreach ($link in $DownloadLinks)
 {
-    Say-Verbose "Downloading `"$($link.type)`" link $($link.downloadLink)"
+    Say "Downloading `"$($link.type)`" link $($link.downloadLink)"
 
     try {
         TimeAndLog "download" { DownloadFile -Source $link.downloadLink -OutPath $ZipPath }
-        Say-Verbose "Download succeeded."
+        Say "Download succeeded."
         $DownloadSucceeded = $true
         $DownloadedLink = $link
         break
